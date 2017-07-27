@@ -1,4 +1,13 @@
-def render_all(con, entities, root_console, screen_width, screen_height):
+def render_all(con, entities, game_map, root_console, screen_width, screen_height, colors):
+
+    # Draw all the tiles in the game map
+    for x, y in game_map:
+        wall = not game_map.transparent[x, y]
+        if wall:
+            con.draw_char(x, y, None, fg=None, bg=colors.get('dark_wall'))
+        else:
+            con.draw_char(x, y, None, fg=None, bg=colors.get('dark_ground'))
+
     # Draw all entities in the list
     for entity in entities:
         draw_entity(con, entity)
