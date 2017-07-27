@@ -1,3 +1,5 @@
+from random import randint
+
 class Rectangle:
     def __init__(self, x, y, w, h):
         self.x1 = x
@@ -27,16 +29,46 @@ def create_x_tunnel(game_map, x1, x2, y):
         game_map.walkable[x, y] = True
         game_map.transparent[x, y] = True
 
-def create_v_tunnel(game_map, y1, y2, x):
+def create_y_tunnel(game_map, y1, y2, x):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         game_map.walkable[x, y] = True
         game_map.transparent[x, y] = True
 
-def make_map(game_map):
-    #for testing
-    room1 = Rectangle(20, 15, 10, 15)
-    room2 = Rectangle(35, 15, 10, 15)
+def make_map(game_map, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+    rooms = []
+    num_rooms = 0
 
-    create_room(game_map, room1)
-    create_room(game_map, room2)
-    create_x_tunnel(game_map, 25, 40, 23)
+    for r in range(max_rooms):
+        w = randint(room_min_size, room_max_size)
+        h = randint(room_min_size, room_max_size)
+        x = randint(0, map_width - w - 1)
+        y = randint(0, map_height - h - 1)
+
+        new_room = Rectangle(x, y, w, h)
+
+        for other_room in rooms:
+            if new_room.intersect(other_room):
+                break
+        else:
+            # if room is valid
+            create_room(game_map, new_room)
+            # center x,y of room
+            (new_x, new_y) = new_room.center()
+
+            if num_rooms == 0:
+                #set player spawn room
+                player.x = new_x
+                player.y = new_y
+            else:
+                # connect all other rooms to the previous room with a tunnel
+                (prev_x, prev_y) = rooms[num_rooms - 1].center()
+                if randint(0, 1) == 1:
+                    create_x_tunnel(game_map, prev_x, new_x, prev_y)
+                    create_y_tunnel(game_map, prev_y, new_y, new_x)
+                else:
+                    create_y_tunnel(game_map, prev_y, new_y, prev_x)
+                    create_x_tunnel(game_map, prev_x, new_x, new_y)
+
+        #Add new rooms to list
+        rooms.append(new_room)
+        num_rooms += 1
