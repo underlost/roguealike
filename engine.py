@@ -52,7 +52,8 @@ def main():
 
         if move:
             dx, dy = move
-            player.move(dx, dy)
+            if game_map.walkable[player.x + dx, player.y + dy]:
+                player.move(dx, dy)
 
         if exit:
             return True
