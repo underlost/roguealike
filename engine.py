@@ -14,6 +14,10 @@ def main():
     map_width = 80
     map_height = 45
 
+    room_max_size = 10
+    room_min_size = 6
+    max_rooms = 30
+
     colors = {
         'dark_wall': (0, 0, 100),
         'dark_ground': (50, 50, 150)
