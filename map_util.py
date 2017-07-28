@@ -1,5 +1,8 @@
 from random import randint
 from tdl.map import Map
+from entity import Entity
+from components.ai import BasicMonster
+from components.player_type import Mage, Warrior
 
 class Rectangle:
     def __init__(self, x, y, w, h):
@@ -18,6 +21,11 @@ class Rectangle:
         return (self.x1 <= other.x2 and self.x2 >= other.x1 and
                 self.y1 <= other.y2 and self.y2 >= other.y1)
 
+class GameMap(Map):
+    def __init__(self, width, height):
+        super().__init__(width, height)
+        self.explored = [[False for y in range(height)] for x in range(width)]
+
 def create_room(game_map, room):
     # go through the tiles in the rectangle and make them passable
     for x in range(room.x1 + 1, room.x2):
@@ -35,12 +43,33 @@ def create_y_tunnel(game_map, y1, y2, x):
         game_map.walkable[x, y] = True
         game_map.transparent[x, y] = True
 
-class GameMap(Map):
-    def __init__(self, width, height):
-        super().__init__(width, height)
-        self.explored = [[False for y in range(height)] for x in range(width)]
 
-def make_map(game_map, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+def place_entities(room, entities, max_monsters_per_room, colors):
+    # Get a random number of monsters
+    number_of_monsters = randint(0, max_monsters_per_room)
+
+    for i in range(number_of_monsters):
+        # Choose a random location in the room
+        x = randint(room.x1 + 1, room.x2 - 1)
+        y = randint(room.y1 + 1, room.y2 - 1)
+
+        if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+            if randint(0, 100) < 80:
+
+                warrior_component = Warrior(hp=10, defense=0, power=3)
+                ai_component = BasicMonster()
+
+                monster = Entity(x, y, 'o', colors.get('desaturated_green'), 'Orc', blocks=True)
+                monster = Entity(x, y, 'o', colors.get('desaturated_green'), 'Orc', blocks=True, class_type=warrior_component, ai=ai_component)
+            else:
+                warrior_component = Warrior(hp=16, defense=1, power=4)
+                ai_component = BasicMonster()
+
+                monster = Entity(x, y, 'T', colors.get('darker_green'), 'Troll', blocks=True, class_type=warrior_component, ai=ai_component)
+
+            entities.append(monster)
+
+def make_map(game_map, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room, colors):
     rooms = []
     num_rooms = 0
 
@@ -75,6 +104,8 @@ def make_map(game_map, max_rooms, room_min_size, room_max_size, map_width, map_h
                     create_y_tunnel(game_map, prev_y, new_y, prev_x)
                     create_x_tunnel(game_map, prev_x, new_x, new_y)
 
-        #Add new rooms to list
+        place_entities(new_room, entities, max_monsters_per_room, colors)
+
+        # Add new rooms to list
         rooms.append(new_room)
         num_rooms += 1
