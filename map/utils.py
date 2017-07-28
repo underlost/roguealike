@@ -1,4 +1,5 @@
 from random import randint
+from tdl.map import Map
 
 class Rectangle:
     def __init__(self, x, y, w, h):
@@ -33,6 +34,11 @@ def create_y_tunnel(game_map, y1, y2, x):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         game_map.walkable[x, y] = True
         game_map.transparent[x, y] = True
+
+class GameMap(Map):
+    def __init__(self, width, height):
+        super().__init__(width, height)
+        self.explored = [[False for y in range(height)] for x in range(width)]
 
 def make_map(game_map, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
     rooms = []
