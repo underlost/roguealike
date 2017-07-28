@@ -76,7 +76,6 @@ def main():
 
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
-                if entity != player:
                 if entity.ai:
                     #print('The ' + entity.name + ' wants a hug.')
                     entity.ai.take_turn(player, game_map, entities)

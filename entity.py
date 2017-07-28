@@ -1,7 +1,7 @@
 import math
 
 class Entity:
-    def __init__(self, x, y, char, color, name, blocks=False, mage=None, ai=None):
+    def __init__(self, x, y, char, color, name, blocks=False, class_type=None, ai=None):
         self.x = x
         self.y = y
         self.char = char
@@ -24,7 +24,7 @@ class Entity:
 
     def move_to(self, target_x, target_y, game_map, entities):
         path = game_map.compute_path(self.x, self.y, target_x, target_y)
-        
+
         dx = path[0][0] - self.x
         dy = path[0][1] - self.y
 
