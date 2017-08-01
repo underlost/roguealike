@@ -3,6 +3,7 @@ from tdl.map import Map
 from entity import Entity
 from components.ai import BasicMonster
 from components.player_type import Mage, Warrior
+from render_functions import RenderOrder
 
 class Rectangle:
     def __init__(self, x, y, w, h):
@@ -59,13 +60,12 @@ def place_entities(room, entities, max_monsters_per_room, colors):
                 warrior_component = Warrior(hp=10, defense=0, power=3)
                 ai_component = BasicMonster()
 
-                monster = Entity(x, y, 'o', colors.get('desaturated_green'), 'Orc', blocks=True)
-                monster = Entity(x, y, 'o', colors.get('desaturated_green'), 'Orc', blocks=True, class_type=warrior_component, ai=ai_component)
+                monster = Entity(x, y, 'o', colors.get('desaturated_green'), 'Orc', blocks=True, render_order=RenderOrder.ACTOR, class_type=warrior_component, ai=ai_component)
             else:
                 warrior_component = Warrior(hp=16, defense=1, power=4)
                 ai_component = BasicMonster()
 
-                monster = Entity(x, y, 'T', colors.get('darker_green'), 'Troll', blocks=True, class_type=warrior_component, ai=ai_component)
+                monster = Entity(x, y, 'T', colors.get('darker_green'), 'Troll', blocks=True, render_order=RenderOrder.ACTOR, class_type=warrior_component, ai=ai_component)
 
             entities.append(monster)
 

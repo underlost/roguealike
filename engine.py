@@ -4,7 +4,8 @@ from components.player_type import Mage, Warrior
 
 from settings import *
 from handler import handle_keys
-from functions import clear_all, render_all
+from render_functions import clear_all, render_all, RenderOrder
+from death_functions import kill_monster, kill_player
 from entity import Entity, get_blocking_entities_at_location
 from game_state import GameStates
 from map_util import make_map, GameMap
@@ -15,7 +16,7 @@ def main():
     con = tdl.Console(screen_width, screen_height)
 
     player_component = Mage(hp=30, defense=2, power=5)
-    player = Entity(0, 0, '@', (255, 255, 255), 'Player', blocks=True, class_type=player_component)
+    player = Entity(0, 0, '@', (255, 255, 255), 'Player', blocks=True, render_order=RenderOrder.ACTOR, class_type=player_component)
 
     entities = [player]
 
@@ -30,7 +31,7 @@ def main():
     while not tdl.event.is_window_closed():
         if fov_recompute:
             game_map.compute_fov(player.x, player.y, fov=fov_algorithm, radius=fov_radius, light_walls=fov_light_walls)
-        render_all(con, entities, game_map, fov_recompute, root_console, screen_width, screen_height, colors)
+        render_all(con, entities, player, game_map, fov_recompute, root_console, screen_width, screen_height, colors)
         tdl.flush()
 
         clear_all(con, entities)
@@ -52,6 +53,8 @@ def main():
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
 
+        player_turn_results = []
+
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
             destination_x = player.x + dx
@@ -61,7 +64,8 @@ def main():
                 target = get_blocking_entities_at_location(entities, destination_x, destination_y)
                 if target:
                     #print('You hug ' + target.name )
-                    player.class_type.attack(target)
+                    attack_results = player.class_type.attack(target)
+                    player_turn_results.extend(attack_results)
                 else:
                     player.move(dx, dy)
                     fov_recompute = True
@@ -74,14 +78,50 @@ def main():
         if fullscreen:
             tdl.set_fullscreen(not tdl.get_fullscreen())
 
+        for player_turn_result in player_turn_results:
+            message = player_turn_result.get('message')
+            dead_entity = player_turn_result.get('dead')
+
+            if message:
+                print(message)
+
+            if dead_entity:
+                if dead_entity == player:
+                    message, game_state = kill_player(dead_entity, colors)
+                else:
+                    message = kill_monster(dead_entity, colors)
+                print(message)
+
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
                 if entity.ai:
                     #print('The ' + entity.name + ' wants a hug.')
-                    entity.ai.take_turn(player, game_map, entities)
+                    #entity.ai.take_turn(player, game_map, entities)
 
+                    enemy_turn_results = entity.ai.take_turn(player, game_map, entities)
 
-            game_state = GameStates.PLAYERS_TURN
+                    for enemy_turn_result in enemy_turn_results:
+                        message = enemy_turn_result.get('message')
+                        dead_entity = enemy_turn_result.get('dead')
+
+                        if message:
+                            print(message)
+
+                        if dead_entity:
+                            if dead_entity == player:
+                                message, game_state = kill_player(dead_entity, colors)
+                            else:
+                                message = kill_monster(dead_entity, colors)
+                            print(message)
+
+                            if game_state == GameStates.PLAYER_DEAD:
+                                break
+
+                    if game_state == GameStates.PLAYER_DEAD:
+                        break
+
+            else:
+                game_state = GameStates.PLAYERS_TURN
 
 if __name__ == '__main__':
     main()

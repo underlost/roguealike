@@ -1,13 +1,16 @@
 import math
 
+from render_functions import RenderOrder
+
 class Entity:
-    def __init__(self, x, y, char, color, name, blocks=False, class_type=None, ai=None):
+    def __init__(self, x, y, char, color, name, blocks=False, render_order=RenderOrder.CORPSE, class_type=None, ai=None):
         self.x = x
         self.y = y
         self.char = char
         self.color = color
         self.name = name
         self.blocks = blocks
+        self.render_order = render_order
         self.class_type = class_type
         self.ai = ai
 

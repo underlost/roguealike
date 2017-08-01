@@ -17,6 +17,7 @@ colors = {
     'light_wall': (130, 110, 50),
     'light_ground': (200, 180, 50),
     'desaturated_green': (63, 127, 63),
-    'darker_green': (0, 127, 0)
+    'darker_green': (0, 127, 0),
+    'dark_red': (191, 0, 0)
 
 }
